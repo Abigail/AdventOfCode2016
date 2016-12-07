@@ -91,4 +91,5 @@ while ($input =~ /(?<turn>[LR])(?<distance>[0-9]+)/g) {
 say "Solution 1: ", distance;
 say "Solution 2: ", $solution2;
 
+
 __END__

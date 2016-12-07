@@ -77,3 +77,6 @@ foreach my $line (@input) {
 
 say "Solution1: $row_possible";
 say "Solution2: $col_possible";
+
+
+__END__
