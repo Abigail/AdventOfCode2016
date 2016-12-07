@@ -1,0 +1,61 @@
+#!/opt/perl/bin/perl
+
+use 5.010;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+my $input = `cat input`;
+
+my $facing = [0, 1];
+my $pos    = [0, 0];
+
+my $solution2;
+
+sub been_here;
+
+sub distance {
+    abs ($$pos [0]) + abs ($$pos [1]);
+}
+
+sub turn ($turn) {
+    if ($turn eq 'R') {
+        $facing = [ $$facing [1], -$$facing [0]];
+    }
+    elsif ($turn eq 'L') {
+        $facing = [-$$facing [1],  $$facing [0]];
+    }
+}
+
+sub walk ($distance) {
+    for (1 .. $distance) {
+        $$pos [0] += $$facing [0];
+        $$pos [1] += $$facing [1];
+        if (been_here == 2) {
+            $solution2 //= distance;
+        }
+    }
+}
+
+sub been_here {
+    state $been_here;
+    ++ $$been_here {$$pos [0], $$pos [1]};
+}
+
+my $done_twice = 0;
+my %seen;
+while ($input =~ /(?<turn>[LR])(?<distance>[0-9]+)/g) {
+    my $turn     = $+ {turn};
+    my $distance = $+ {distance};
+    turn $turn;
+    walk $distance;
+}
+
+say "Solution 1: ", distance;
+say "Solution 2: ", $solution2;
+
+__END__
