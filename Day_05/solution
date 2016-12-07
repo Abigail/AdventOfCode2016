@@ -1,0 +1,39 @@
+#!/opt/perl/bin/perl
+
+use 5.010;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+use Digest::MD5 qw [md5_hex];
+
+my $PASSWORD_LENGTH = 8;
+
+my $key       = "ojvtpuvg";
+my $inc       =  0;
+my $password1 = "";
+my $password2 = " " x $PASSWORD_LENGTH;
+
+while (1) {
+    my $input = $key . $inc ++;
+    my $out   = md5_hex ($input);
+    if ($out =~ /^00000(?<char1>.)(?<char2>.)/) {
+        my $char1 = $+ {char1};
+        my $char2 = $+ {char2};
+
+        $password1 .= $char1;
+        if ($char1 =~ /[0-7]/ && substr ($password2, $char1, 1) eq " ") {
+            substr ($password2, $char1, 1) = $char2;
+        }
+        last unless $password2 =~ / /;
+    }
+}
+
+substr ($password1, $PASSWORD_LENGTH) = "";
+
+say "Solution1: $password1";
+say "Solution2: $password2";
