@@ -1,0 +1,103 @@
+#!/opt/perl/bin/perl
+
+use 5.010;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+my @input = `cat input`;
+
+package Pad {
+    use Hash::Util::FieldHash qw [fieldhash];
+
+    fieldhash my %pad;
+    fieldhash my %x;
+    fieldhash my %y;
+
+    sub new ($class) {
+        bless do {\my $var} => $class;
+    }
+
+    sub set_pad ($self, $pad) {
+        my @pad      =  map {[0, split ('' => $_), 0]}
+                        split /\n/ => $pad =~ s/ /0/gr;
+        push @pad    => [(0) x @{$pad [0]}];
+        unshift @pad => $pad [-1];
+        
+        $pad {$self} = \@pad;
+        $self;
+    }
+
+    sub set_x_y ($self, $x, $y) {
+        $x {$self} = $x + 1;
+        $y {$self} = $y + 1;
+        $self;
+    }
+
+    my $directions = {
+        U   =>  [-1,  0],
+        R   =>  [ 0,  1],
+        D   =>  [ 1,  0],
+        L   =>  [ 0, -1]
+    };
+
+    sub move ($self, $direction) {
+        my $delta  = $$directions {$direction} or return;
+        my $next_x = $x {$self} + $$delta [0];
+        my $next_y = $y {$self} + $$delta [1];
+        return unless $pad {$self} [$next_x] [$next_y];
+
+        $x {$self} = $next_x;
+        $y {$self} = $next_y;
+        return;
+    }
+
+    sub code ($self) {
+        $pad {$self} [$x {$self}] [$y {$self}];
+    }
+};
+
+
+
+my $pad1_layout = << "--";
+123
+456
+789
+--
+
+my $pad2_layout = << "--";
+  1
+ 234
+56789
+ ABC
+  D
+--
+
+
+my $pad1 = Pad:: -> new
+                 -> set_pad ($pad1_layout)
+                 -> set_x_y (1, 1);
+
+my $pad2 = Pad:: -> new
+                 -> set_pad ($pad2_layout)
+                 -> set_x_y (2, 0);
+
+my $code1 = "";
+my $code2 = "";
+foreach my $line (@input) {
+    foreach my $direction (split '' => $line) {
+        $pad1 -> move ($direction);
+        $pad2 -> move ($direction);
+    }
+    $code1 .= $pad1 -> code;
+    $code2 .= $pad2 -> code;
+}
+
+say "Solution1: $code1";
+say "Solution2: $code2";
+
+__END__
