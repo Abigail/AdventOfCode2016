@@ -1,0 +1,43 @@
+#!/opt/perl/bin/perl
+
+use 5.010;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+my @input = `cat input`;
+
+my $EDGES_IN_TRIANGLE = 3;
+
+my $row_possible = 0;
+my $col_possible = 0;
+
+sub is_possible (@edge_lengths) {
+    my @lengths = sort {$a <=> $b} @edge_lengths;
+    my $longest = pop @lengths;
+    my $others  = 0;
+       $others += $_ for @lengths;
+    $others > $longest;
+}
+
+my @cache;
+foreach my $line (@input) {
+    my @edge_lengths = split ' ' => $line;
+
+    $row_possible ++ if is_possible @edge_lengths;
+
+    push @cache => \@edge_lengths;
+    if (@cache == $EDGES_IN_TRIANGLE) {
+        for my $pos (0 .. $EDGES_IN_TRIANGLE - 1) {
+            $col_possible ++ if is_possible map {$$_ [$pos]} @cache;
+        }
+        @cache = ();
+    }
+}
+
+say "Solution1: $row_possible";
+say "Solution2: $col_possible";
