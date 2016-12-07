@@ -1,0 +1,44 @@
+#!/opt/perl/bin/perl
+
+use 5.010;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+my @input = `cat input`;
+
+my $CHECKSUM_LENGTH = 5;
+my $id_sum = 0;
+my $north_pole_id;
+
+foreach my $line (@input) {
+    $line =~ /^(?<name>[-a-z]+)-
+               (?<id>[0-9]+)
+             \[(?<checksum>[a-z]{$CHECKSUM_LENGTH})\]/x or next;
+    my $name     = $+ {name};
+    my $id       = $+ {id};
+    my $checksum = $+ {checksum};
+
+    my %count;
+    $count {$_} ++ for split // => $name =~ s/-//gr;
+
+    my @char_order = sort {$count {$b} <=> $count {$a} ||
+                                   $a  cmp         $b} keys %count;
+    my $exp_checksum = join "" => @char_order [0 .. $CHECKSUM_LENGTH - 1];
+
+    $id_sum += $id if $exp_checksum eq $checksum;
+
+    #
+    # Decrypt
+    #
+    $name =~ tr/a-z/b-za/ for 1 .. ($id % 26);
+    $name =~ tr/-/ /;
+    $north_pole_id = $id if $name eq 'northpole object storage';
+}
+
+say "Solution1: $id_sum";
+say "Solution2: $north_pole_id";
