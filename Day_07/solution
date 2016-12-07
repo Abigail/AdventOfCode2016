@@ -1,0 +1,44 @@
+#!/opt/perl/bin/perl
+
+use 5.010;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+my @input = `cat input`;
+
+sub has_abba ($string) {
+    $string =~ /(.)(?!\g{1})(.)\g{2}\g{1}/;
+}
+
+my $tls_ok = 0;
+my $sls_ok = 0;
+
+foreach my $line (@input) {
+    chomp $line;
+    my @chunks  = $line =~ /[a-z]+/g;
+    my $inside  = join " " => do {my $i = 0; grep {$i ++ % 2} @chunks};
+    my $outside = join " " => do {my $i = 1; grep {$i ++ % 2} @chunks};
+
+    #
+    # For TLS, we must have ABBA on an outside block, 
+    # and no ABBA on an inside block
+    #
+    $tls_ok ++ if has_abba ($outside) && !has_abba ($inside);
+
+    #
+    # For SLS, there must be an ABA in an outside block, with
+    # a corresponding BAB in an inside block.
+    #
+    $sls_ok ++ if
+       "$outside-$inside" =~ /(.)(?!\g{1})(.)\g{1}.*-.*\g{2}\g{1}\g{2}/;
+}
+
+say "Solution1: $tls_ok";
+say "Solution2: $sls_ok";
+
+__END__
