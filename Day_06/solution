@@ -1,0 +1,32 @@
+#!/opt/perl/bin/perl
+
+use 5.010;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+my @input = `cat input`;
+my @hist;
+
+foreach my $line (@input) {
+    chomp $line;
+    my @letters = split // => $line;
+    for (my $i = 0; $i < @letters; $i ++) {
+        $hist [$i] {$letters [$i]} ++;
+    }
+}
+
+my $message1 = "";
+my $message2 = "";
+foreach my $hist (@hist) {
+    my @letters = sort {$$hist {$a} <=> $$hist {$b}} keys %$hist;
+    $message1 .= $letters [-1];
+    $message2 .= $letters [ 0];
+}
+
+say "Solution1: $message1";
+say "Solution2: $message2";
