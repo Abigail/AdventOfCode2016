@@ -45,7 +45,8 @@ no  warnings 'experimental::signatures';
 # What is the sector ID of the room where North Pole objects are stored?
 # 
 
-my @input = `cat input`;
+@ARGV     = "input" unless @ARGV;
+my @input = <ARGV>;
 
 my $CHECKSUM_LENGTH = 5;
 my $id_sum = 0;

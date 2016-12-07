@@ -44,7 +44,8 @@ no  warnings 'experimental::signatures';
 # How many IPs in your puzzle input support SSL?
 #
 
-my @input = `cat input`;
+@ARGV     = "input" unless @ARGV;
+my @input = <ARGV>;
 
 sub has_abba ($string) {
     $string =~ /(.)(?!\g{1})(.)\g{2}\g{1}/;

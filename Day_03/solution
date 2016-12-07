@@ -44,7 +44,8 @@ no  warnings 'experimental::signatures';
 # In your puzzle input, how many of the listed triangles are possible?
 #
 
-my @input = `cat input`;
+@ARGV     = "input" unless @ARGV;
+my @input = <ARGV>;
 
 my $EDGES_IN_TRIANGLE = 3;
 

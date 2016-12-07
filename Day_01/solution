@@ -41,7 +41,8 @@ no  warnings 'experimental::signatures';
 # How many blocks away is the first location you visit twice?
 # 
 
-my $input = `cat input`;
+@ARGV     = "input" unless @ARGV;
+my $input = <ARGV>;
 
 my $facing = [0, 1];
 my $pos    = [0, 0];

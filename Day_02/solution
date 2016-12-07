@@ -60,8 +60,8 @@ no  warnings 'experimental::signatures';
 # bathroom code?
 #
 
-
-my @input = `cat input`;
+@ARGV     = "input" unless @ARGV;
+my @input = <ARGV>;
 
 package Pad {
     use Hash::Util::FieldHash qw [fieldhash];

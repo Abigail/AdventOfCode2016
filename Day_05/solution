@@ -53,7 +53,10 @@ use Digest::MD5 qw [md5_hex];
 
 my $PASSWORD_LENGTH = 8;
 
-my $key       = "ojvtpuvg";
+@ARGV   = "input" unless @ARGV;
+my $key = <ARGV>;
+chomp $key;
+
 my $inc       =  0;
 my $password1 = "";
 my $password2 = "_" x $PASSWORD_LENGTH;

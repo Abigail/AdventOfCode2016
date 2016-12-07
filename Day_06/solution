@@ -50,7 +50,9 @@ no  warnings 'experimental::signatures';
 # 
 
 
-my @input = `cat input`;
+@ARGV     = "input" unless @ARGV;
+my @input = <ARGV>;
+
 my @hist;
 
 foreach my $line (@input) {
