@@ -1,0 +1,199 @@
+#!/opt/perl/bin/perl
+
+use 5.020;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+#
+# Part 1:
+#
+# You come across a door implementing what you can only assume is an
+# implementation of two-factor authentication after a long game of
+# requirements telephone.
+# 
+# To get past the door, you first swipe a keycard (no problem; there
+# was one on a nearby desk). Then, it displays a code on a little
+# screen, and you type that code on a keypad. Then, presumably, the
+# door unlocks.
+# 
+# Unfortunately, the screen has been smashed. After a few minutes,
+# you've taken everything apart and figured out how it works. Now you
+# just have to work out what the screen would have displayed.
+# 
+# The magnetic strip on the card you swiped encodes a series of
+# instructions for the screen; these instructions are your puzzle
+# input. The screen is 50 pixels wide and 6 pixels tall, all of which
+# start off, and is capable of three somewhat peculiar operations:
+# 
+#     rect AxB turns on all of the pixels in a rectangle at the
+#              top-left of the screen which is A wide and B tall.
+# 
+#     rotate row y=A by B shifts all of the pixels in row A (0 is the
+#              top row) right by B pixels. Pixels that would fall off
+#              the right end appear at the left end of the row.
+# 
+#     rotate column x=A by B shifts all of the pixels in column A (0
+#              is the left column) down by B pixels. Pixels that would
+#              fall off the bottom appear at the top of the column.
+# 
+# For example, here is a simple sequence on a smaller screen:
+# 
+#     rect 3x2 creates a small rectangle in the top-left corner:
+# 
+#     ###....
+#     ###....
+#     .......
+# 
+#     rotate column x=1 by 1 rotates the second column down by one pixel:
+# 
+#     #.#....
+#     ###....
+#     .#.....
+# 
+#     rotate row y=0 by 4 rotates the top row right by four pixels:
+# 
+#     ....#.#
+#     ###....
+#     .#.....
+# 
+#     rotate column x=1 by 1 again rotates the second column down by
+#     one pixel, causing the bottom pixel to wrap back to the top:
+# 
+#     .#..#.#
+#     #.#....
+#     .#.....
+# 
+# As you can see, this display technology is extremely powerful, and
+# will soon dominate the tiny-code-displaying-screen market. That's
+# what the advertisement on the back of the display tries to convince
+# you, anyway.
+# 
+# There seems to be an intermediate check of the voltage used by the
+# display: after you swipe your card, if the screen did work, how
+# many pixels should be lit?
+# 
+#
+#
+# Part 2:
+#
+# You notice that the screen is only capable of displaying capital
+# letters; in the font it uses, each letter is 5 pixels wide and 6
+# tall.
+# 
+# After you swipe your card, what code is the screen trying to display?
+#
+
+@ARGV = "input" unless @ARGV;
+
+my $lit1  = 0;
+my $lit2  = 0;
+
+my $MAX_X = 50;
+my $MAX_Y =  6;
+
+#
+# Initialize the board. 0 is used for an unlit pixel, 1 for a lit one.
+#
+my $board;
+for (my $x = 0; $x < $MAX_X; $x ++) {
+    for (my $y = 0; $y < $MAX_Y; $y ++) {
+        $$board [$x] [$y] = 0;
+    }
+}
+
+
+#
+# Light a set of pixels in the upper left corner
+#
+sub rect ($max_x, $max_y) {
+    die if $max_x >= $MAX_X || $max_y >= $MAX_Y;
+    for (my $x = 0; $x < $max_x; $x ++) {
+        for (my $y = 0; $y < $max_y; $y ++) {
+            $$board [$x] [$y] = 1;
+        }
+    }
+}
+
+
+#
+# Rotate the $y'th row by amount $delta
+#
+sub row ($y, $delta) {
+    die if $y >= $MAX_Y;
+    foreach (1 .. $delta) {
+        my $save = $$board [$MAX_X - 1] [$y];
+        for (my $x = $MAX_X - 1; $x; $x --) {
+            $$board [$x] [$y] = $$board [$x - 1] [$y];
+        }
+        $$board [0] [$y] = $save;
+    }
+}
+
+
+#
+# Rotate the $x'th column by amount $delta
+#
+sub column ($x, $delta) {
+    die if $x >= $MAX_X;
+    foreach (1 .. $delta) {
+        my $save = $$board [$x] [$MAX_Y - 1];
+        for (my $y = $MAX_Y - 1; $y; $y --) {
+            $$board [$x] [$y] = $$board [$x] [$y - 1];
+        }
+        $$board [$x] [0] = $save;
+    }
+}
+
+
+#
+# Count the number of light pixels
+#
+sub lit {
+    my $lit = 0;
+    for (my $x = 0; $x < $MAX_X; $x ++) {
+        for (my $y = 0; $y < $MAX_Y; $y ++) {
+            $lit ++ if $$board [$x] [$y];
+        }
+    }
+    $lit;
+}
+
+
+#
+# Display the board
+#
+sub show {
+    for (my $y = 0; $y < $MAX_Y; $y ++) {
+        for (my $x = 0; $x < $MAX_X; $x ++) {
+            print $$board [$x] [$y] ? "#" : ".";
+        }
+        print "\n";
+    }
+}
+
+
+#
+# Parse the lines of input, then run a command for each line.
+#
+while (<>) {
+    no strict 'refs';
+    /(?| (?<command>rect)   \s*             (?<arg1>[0-9]+)
+                                  \s* x \s* (?<arg2>[0-9]+)  |
+         (?<command>column) \s* x \s* = \s* (?<arg1>[0-9]+)
+                                 \s* by \s* (?<arg2>[0-9]+)  |
+         (?<command>row)    \s* y \s* = \s* (?<arg1>[0-9]+)
+                                 \s* by \s* (?<arg2>[0-9]+))/x &&
+        &{$+ {command}} (@+ {qw {arg1 arg2}});
+}
+
+
+say "Solution1: ", lit;
+say "Solution2:"; show;
+
+
+__END__
