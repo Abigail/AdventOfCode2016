@@ -71,8 +71,8 @@ foreach my $hist (@hist) {
     $message2 .= $letters [ 0];
 }
 
-say "Solution1: $message1";
-say "Solution2: $message2";
+say "Solution 1: $message1";
+say "Solution 2: $message2";
 
 
 __END__

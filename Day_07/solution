@@ -74,8 +74,8 @@ foreach my $line (@input) {
        "$outside-$inside" =~ /(.)(?!\g{1})(.)\g{1}.*-.*\g{2}\g{1}\g{2}/;
 }
 
-say "Solution1: $tls_ok";
-say "Solution2: $sls_ok";
+say "Solution 1: $tls_ok";
+say "Solution 2: $sls_ok";
 
 
 __END__

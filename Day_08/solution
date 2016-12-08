@@ -192,8 +192,8 @@ while (<>) {
 }
 
 
-say "Solution1: ", lit;
-say "Solution2:"; show;
+say "Solution 1: ", lit;
+say "Solution 2:"; show;
 
 
 __END__

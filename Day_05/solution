@@ -84,8 +84,8 @@ print "\n";
 
 substr ($password1, $PASSWORD_LENGTH) = "";
 
-say "Solution1: $password1";
-say "Solution2: $password2";
+say "Solution 1: $password1";
+say "Solution 2: $password2";
 
 
 __END__

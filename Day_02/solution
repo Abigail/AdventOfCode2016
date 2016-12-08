@@ -149,8 +149,8 @@ foreach my $line (@input) {
     $code2 .= $pad2 -> code;
 }
 
-say "Solution1: $code1";
-say "Solution2: $code2";
+say "Solution 1: $code1";
+say "Solution 2: $code2";
 
 
 __END__

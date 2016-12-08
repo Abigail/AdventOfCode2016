@@ -77,8 +77,8 @@ foreach my $line (@input) {
     $north_pole_id = $id if $name eq 'northpole object storage';
 }
 
-say "Solution1: $id_sum";
-say "Solution2: $north_pole_id";
+say "Solution 1: $id_sum";
+say "Solution 2: $north_pole_id";
 
 
 __END__
