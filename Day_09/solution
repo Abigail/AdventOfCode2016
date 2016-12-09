@@ -99,7 +99,7 @@ $input =~ s/\s+//g;
 #
 # This algorithm works because of the following assumptions:
 #   - Every '(' starts a valid marker; that is, it's always followed
-#     followed by a numbers, and 'x', another number, and a ')'.
+#     followed by a number, an 'x', another number, and a ')'.
 #   - The substring to be repeated does not exceed the length of the string
 #   - We never repeat part of a marker
 #   - In the recursive case, (part 2), repeated markers never exceed
