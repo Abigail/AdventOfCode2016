@@ -151,7 +151,7 @@ sub run (%register) {
             1;
         }
         elsif ($command eq 'jnz') {
-            $pc += val ($args [1] - 1, \%register) if val $args [0], \%register;
+            $pc += val ($args [1], \%register) - 1 if val $args [0], \%register;
         }
         else {
             die "Unknown command '$command @args'";
