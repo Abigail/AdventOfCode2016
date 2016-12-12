@@ -1,0 +1,146 @@
+#!/opt/perl/bin/perl
+
+use 5.020;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+#
+# Part 1:
+#
+# 
+# You come upon a factory in which many robots are zooming around
+# handing small microchips to each other.
+# 
+# Upon closer examination, you notice that each bot only proceeds
+# when it has two microchips, and once it does, it gives each one to
+# a different bot or puts it in a marked "output" bin. Sometimes,
+# bots take microchips from "input" bins, too.
+# 
+# Inspecting one of the microchips, it seems like they each contain
+# a single number; the bots must use some logic to decide what to do
+# with each chip. You access the local control computer and download
+# the bots' instructions (your puzzle input).
+# 
+# Some of the instructions specify that a specific-valued microchip
+# should be given to a specific bot; the rest of the instructions
+# indicate what a given bot should do with its lower-value or
+# higher-value chip.
+# 
+# For example, consider the following instructions:
+# 
+#   value 5 goes to bot 2
+#   bot 2 gives low to bot 1 and high to bot 0
+#   value 3 goes to bot 1
+#   bot 1 gives low to output 1 and high to bot 0
+#   bot 0 gives low to output 2 and high to output 0
+#   value 2 goes to bot 2
+# 
+#   Initially, bot 1 starts with a value-3 chip, and bot 2 starts
+#   with a value-2 chip and a value-5 chip.
+#   Because bot 2 has two microchips, it gives its lower one (2)
+#   to bot 1 and its higher one (5) to bot 0.
+#   Then, bot 1 has two microchips; it puts the value-2 chip in
+#   output 1 and gives the value-3 chip to bot 0.
+#   Finally, bot 0 has two microchips; it puts the 3 in output 2
+#   and the 5 in output 0.
+#
+# In the end, output bin 0 contains a value-5 microchip, output bin
+# 1 contains a value-2 microchip, and output bin 2 contains a value-3
+# microchip. In this configuration, bot number 2 is responsible for
+# comparing value-5 microchips with value-2 microchips.
+# 
+# Based on your instructions, what is the number of the bot that is
+# responsible for comparing value-61 microchips with value-17 microchips?
+# 
+#
+# Part 2
+#
+# What do you get if you multiply together the values of one chip in
+# each of outputs 0, 1, and 2?
+#
+
+@ARGV = "input" unless @ARGV;
+
+my (@bots, @rules, @output);
+
+
+#
+# Parse the input, create rules, and inialize.
+#
+while (<>) {
+    if (/^bot \s+ (?<bot>[0-9]+) \s+ gives \s+ low \s+ to \s+
+          (?<low_target>bot|output) \s+ (?<low_target_id>[0-9]+)
+                                 \s+ and \s+ high \s+ to \s+
+          (?<high_target>bot|output) \s+ (?<high_target_id>[0-9]+)/x) {
+        my ($bot, $low_target, $low_target_id, $high_target, $high_target_id) =
+            @+ {qw [bot low_target low_target_id high_target high_target_id]};
+        $low_target_id  .= " output" if $low_target  eq 'output';
+        $high_target_id .= " output" if $high_target eq 'output';
+        $rules [$bot] = [$low_target_id, $high_target_id];
+    }
+    elsif (/^value \s+ (?<value>[0-9]+) \s+ goes \s+ 
+             to \s+ bot \s+ (?<bot>[0-9]+)/x) {
+        push @{$bots [$+ {bot}]} => $+ {value};
+    }
+    else {
+        die "Failed to parse $_";
+    }
+}
+
+
+my $NR_OF_BOTS = @bots;
+
+#
+# Make sure all bots are initialized.
+#
+for (my $bot = 0; $bot < @rules; $bot ++) {
+    $bots [$bot] //= [];
+}
+
+
+my $solution1;
+my $solution2;
+my $count = 0;
+my @todo  = grep {@{$bots [$_]} == 2} 0 .. ($NR_OF_BOTS - 1);
+
+while (@todo) {
+    my $bot = shift @todo;
+
+    my ($low, $high) = sort {$a <=> $b} splice @{$bots [$bot]} => 0, 2;
+    if ($low == 17 && $high == 61) {
+        $solution1 //= $bot;
+    }
+    my ($low_id, $high_id) = @{$rules [$bot]};
+    if ($low_id =~ /^([0-9]+) output/) {
+        $output [$1] = $low;
+    }
+    else {
+        push @{$bots [$low_id]} => $low;
+        push @todo => $low_id  if @{$bots [$low_id]}  == 2;
+    }
+
+    if ($high_id =~ /^([0-9]+) output/) {
+        $output [$1] = $high;
+    }
+    else {
+        push @{$bots [$high_id]} => $high;
+        push @todo => $high_id  if @{$bots [$high_id]}  == 2;
+    }
+
+}
+
+$solution2 = $output [0] *
+             $output [1] *
+             $output [2];
+
+
+say "Solution 1: ", $solution1;
+say "Solution 2: ", $solution2;
+
+
+__END__
