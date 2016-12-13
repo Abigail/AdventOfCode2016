@@ -9,6 +9,8 @@ no  warnings 'syntax';
 use feature  'signatures';
 no  warnings 'experimental::signatures';
 
+use List::Util qw [min];
+
 #
 # Part 1:
 #
@@ -212,6 +214,7 @@ my %stuff;
 
 package State {
     use Hash::Util::FieldHash qw [fieldhash];
+    use List::Util            qw [min];
 
     fieldhash my %stuff;
     fieldhash my %elevator;
@@ -316,9 +319,17 @@ package State {
                                         @stuff;
 
         #
-        # Floors to move 
+        # If all floors below the current floor are empty, don't move
+        # stuff there
         #
-        my @floors = grep {$_ >= 0 && $_ < 4} $floor - 1, $floor + 1;
+        my $min_floor = min map {@{$stuff {$self} {$_}} {$GENERATOR,
+                                                         $MICROCHIP}} @stuff;
+
+        #
+        # Floors to move stuff to
+        #
+        my @floors = grep {$_ >= $min_floor && $_ <= $TARGET_FLOOR} $floor - 1,
+                                                                    $floor + 1;
 
         #
         # Possible stuff to take
