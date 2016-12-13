@@ -1,0 +1,154 @@
+#!/opt/perl/bin/perl
+
+use 5.020;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+#
+# Part 1
+#
+# You arrive at the first floor of this new building to discover a
+# much less welcoming environment than the shiny atrium of the last
+# one. Instead, you are in a maze of twisty little cubicles, all
+# alike.
+# 
+# Every location in this area is addressed by a pair of non-negative
+# integers (x,y). Each such coordinate is either a wall or an open
+# space. You can't move diagonally. The cube maze starts at 0,0 and
+# seems to extend infinitely toward positive x and y; negative values
+# are invalid, as they represent a location outside the building. You
+# are in a small waiting area at 1,1.
+# 
+# While it seems chaotic, a nearby morale-boosting poster explains,
+# the layout is actually quite logical. You can determine whether a
+# given x,y coordinate will be a wall or an open space using a simple
+# system:
+# 
+#   Find x*x + 3*x + 2*x*y + y + y*y.  Add the office designer's
+#   favorite number (your puzzle input).  Find the binary representation
+#   of that sum; count the number of bits that are 1.
+#        If the number of bits that are 1 is even, it's an open space.
+#        If the number of bits that are 1 is odd, it's a wall.
+#
+# For example, if the office designer's favorite number were 10,
+# drawing walls as # and open spaces as ., the corner of the building
+# containing 0,0 would look like this:
+# 
+#      0123456789
+#    0 .#.####.##
+#    1 ..#..#...#
+#    2 #....##...
+#    3 ###.#.###.
+#    4 .##..#..#.
+#    5 ..##....#.
+#    6 #...##.###
+# 
+# Now, suppose you wanted to reach 7,4. The shortest route you could
+# take is marked as O:
+# 
+#      0123456789
+#    0 .#.####.##
+#    1 .O#..#...#
+#    2 #OOO.##...
+#    3 ###O#.###.
+#    4 .##OO#OO#.
+#    5 ..##OOO.#.
+#    6 #...##.###
+# 
+# Thus, reaching 7,4 would take a minimum of 11 steps (starting from
+# your current location, 1,1).
+# 
+# What is the fewest number of steps required for you to reach 31,39?
+# 
+#
+# Part 2
+#
+# 
+# How many locations (distinct x,y coordinates, including your starting
+# location) can you reach in at most 50 steps?
+# 
+
+my $favourite = @ARGV ? shift : 1362;
+
+my $board;
+my $start_x   =  1;
+my $start_y   =  1;
+my $target_x  = 31;
+my $target_y  = 39;
+my $max_reach = 50;
+
+sub is_wall ($x, $y) {
+    (sprintf "%0b" => $x * $x + 3 * $x + 2 * $x * $y + $y + $y * $y +
+                      $favourite) =~ tr/1/1/ % 2;
+}
+
+
+$$board [$start_x] [$start_y] = 0;
+
+my @todo = ([$start_x, $start_y]);   # We start here.
+
+my $solution1;
+my $solution2 = 1;   # Starting position.
+
+my $passed_max_reach;
+
+while (@todo) {
+    my ($this_x, $this_y) = @{shift @todo};
+
+    foreach my $delta_x (-1 .. 1) {
+        my $x = $this_x + $delta_x;
+        next if $x < 0;
+        foreach my $delta_y (-1 .. 1) {
+            my $y = $this_y + $delta_y;
+            next if $y < 0;
+
+            #
+            # We cannot move diagonally, so exactly one of $delta_x or
+            # $delta_y has to be 0.
+            #
+            next unless $delta_x xor $delta_y;
+
+            #
+            # If $$board [$x] [$y] is defined, we have already
+            # determined the status of this location (either a
+            # wall, or we calculated the distance); no need to
+            # continue with this location.
+            #
+            next if defined $$board [$x] [$y];
+
+            #
+            # Haven't seen ($x, $y) yet.
+            # 
+            if (is_wall ($x, $y)) {
+                $$board [$x] [$y] = 0;
+            }
+            else {
+                $$board [$x] [$y] = 1 + $$board [$this_x] [$this_y];
+                push @todo => [$x, $y];
+                if ($$board [$x] [$y] <= $max_reach) {
+                    $solution2 ++;
+                }
+                else {
+                    $passed_max_reach = 1;
+                }
+                if ($x == $target_x && $y == $target_y) {
+                    $solution1 //= $$board [$x] [$y];
+                }
+            }
+        }
+    }
+
+    last if $solution1 && $passed_max_reach;
+}
+
+
+say "Solution 1: ", $solution1 // "No route possible";
+say "Solution 2: ", $solution2;
+
+
+__END__
