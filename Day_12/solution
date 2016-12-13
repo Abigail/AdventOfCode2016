@@ -94,7 +94,6 @@ while (<>) {
 #   sets register y to 0.
 #   We also set a couple of 'nop's to not disturb other jumps.
 #
-my @copy;
 for (my $i = 0; $i < @instructions; $i ++) {
     if ($i + 2 < @instructions              &&
         $instructions [$i]     [0] eq 'inc' &&
@@ -102,17 +101,13 @@ for (my $i = 0; $i < @instructions; $i ++) {
         $instructions [$i + 2] [0] eq 'jnz' &&
         $instructions [$i + 2] [2] ==  -2   &&
         $instructions [$i + 1] [1] eq $instructions [$i + 2] [1]) {
-        push @copy => [add => $instructions [$i]     [1],
-                              $instructions [$i + 1] [1]],
-                      ["nop"],
-                      ["nop"];
-        $i += 2;
-    }
-    else {
-        push @copy => $instructions [$i];
+
+        $instructions [$i ++] = [add => $instructions [$i]     [1],
+                                        $instructions [$i + 1] [1]];
+        $instructions [$i ++] = ["nop"];
+        $instructions [$i]    = ["nop"];
     }
 }
-@instructions = @copy;
 
 
 #
