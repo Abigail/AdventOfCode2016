@@ -82,6 +82,8 @@ my $target_x  = 31;
 my $target_y  = 39;
 my $max_reach = 50;
 
+my $show_maze =  1;
+
 sub is_wall ($x, $y) {
     (sprintf "%0b" => $x * $x + 3 * $x + 2 * $x * $y + $y + $y * $y +
                       $favourite) =~ tr/1/1/ % 2;
@@ -125,7 +127,7 @@ while (@todo) {
             # Haven't seen ($x, $y) yet.
             # 
             if (is_wall ($x, $y)) {
-                $$board [$x] [$y] = 0;
+                $$board [$x] [$y] = -1;
             }
             else {
                 $$board [$x] [$y] = 1 + $$board [$this_x] [$this_y];
@@ -146,6 +148,15 @@ while (@todo) {
     last if $solution1 && $passed_max_reach;
 }
 
+if ($show_maze) {
+    for (my $x = 0; $x < @$board; $x ++) {
+        for (my $y = 0; $y < @{$$board [$x]}; $y ++) {
+            my $val = $$board [$x] [$y];
+            print defined $val ? $val >= 0 ? $val <= $max_reach ? "o" : "." : "#" : " ";
+        }
+        print "\n";
+    }
+}
 
 say "Solution 1: ", $solution1 // "No route possible";
 say "Solution 2: ", $solution2;
