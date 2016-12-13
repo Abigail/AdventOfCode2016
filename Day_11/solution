@@ -352,6 +352,12 @@ package State {
 
         my @moves = map {my $floor = $_;
                          map {[$floor => @$_]} @take} @floors;
+
+        #
+        # Never move 2 things down. (But is this correct in general
+        # case? It works for the given input).
+        #
+        @moves = grep {$$_ [0] > $elevator {$self} || @$_ == 3} @moves;
     }
 
     #
