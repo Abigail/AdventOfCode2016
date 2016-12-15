@@ -123,12 +123,23 @@ sub solve (@discs) {
                       $$first_disc [$DELAY]) %
                       $$first_disc [$SIZE];
 
+    #
+    # What we do here is to keep a set of discs "aligned". That is, they're
+    # in a position that the capsule will go through. We check whether the
+    # capsule will go through all the way; if it does, we're done. Else,
+    # if one of more other discs are aligned, we take this into account.
+    # Next, we skip ahead as many seconds as needed to get the same discs
+    # aligned again.
+    #
+    my $increment   = $$first_disc [$SIZE];
+    my $other_start = 1;
   TIME:
-    for (my $second = $first_time; ; $second += $$first_disc [$SIZE]) {
+    for (my $second = $first_time; ; $second += $increment) {
         #
         # Check each other disc
         #
-        foreach my $disc (@discs [1 .. @discs - 1]) {
+        for (my $i = $other_start; $i < @discs; $i ++) {
+              my $disc = $discs [$i];
               #
               # Calculate the position of the given disc at
               #       t =  $delay + $second + 1
@@ -136,7 +147,25 @@ sub solve (@discs) {
               my $time = $$disc [$DELAY] + $second;
               my $position = ($$disc [$START] + $time) %
                               $$disc [$SIZE];
+
+              #
+              # If $position != 0, the disc is out of sync, and the
+              # capsule will bounce off. Advance the discs, and try
+              # again.
+              #
               next TIME if $position;
+
+              #
+              # We got a match, which means the disc is now "in sync".
+              # This means, we can increase the interation step, and
+              # not check this disc again.
+              #
+              # Note that we can do this because all disc sizes are
+              # relative prime to each other (else, we would have to
+              # calculate the least common multiply).
+              #
+              $increment  *= $$disc [$SIZE];
+              $other_start = $i + 1;
         }
         return $second;
     }
