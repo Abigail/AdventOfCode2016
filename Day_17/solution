@@ -1,0 +1,84 @@
+#!/opt/perl/bin/perl
+
+use 5.020;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+use Digest::MD5 qw [md5_hex];
+
+my $input         = shift // "mmsxrhfx";
+
+my $X             =  0;
+my $Y             =  1;
+my $PATH          =  2;
+
+my $start;
+  $$start [$X]    =  0;
+  $$start [$Y]    =  0;
+  $$start [$PATH] = "";
+my $target_x      =  3;
+my $target_y      =  3;
+
+my @steps         = ([ 0, -1, "U"],
+                     [ 0,  1, "D"],
+                     [-1,  0, "L"],
+                     [ 1,  0, "R"]);
+
+my $solution1;
+my $solution2;
+
+my @todo = ($start);
+while (@todo) {
+    my ($x, $y, $path) = @{shift @todo};
+    my @directions = split // => substr md5_hex ("$input$path"), 0, 4;
+    for (my $i = 0; $i < @directions; $i ++) {
+        next unless $directions [$i] =~ /[b-f]/;   # "b" to "f" means the
+                                                   # door is open, otherwise,
+                                                   # the door is closed.
+        #
+        # Calculate the new position
+        #
+        my $new_x = $x + $steps [$i] [$X];
+        my $new_y = $y + $steps [$i] [$Y];
+
+        #
+        # Check for boundaries
+        #
+        next if $new_x < 0 || $new_x > $target_x ||
+                $new_y < 0 || $new_y > $target_y;
+
+        my $new_path = $path . $steps [$i] [$PATH];
+
+        #
+        # Got a path reaching the target
+        #
+        if ($new_x == $target_x &&
+            $new_y == $target_y) {
+
+            #
+            # Since we're doing a BFS, the first time we get here, it
+            # will be a shortest path. Last time we get here, it will
+            # be a longest path. So, we set $solution1 first time we
+            # get here, and $solution2 each time, so when we're done,
+            # $solution2 will contain the correct answer.
+            #
+            $solution1 //=        $new_path;
+            $solution2   = length $new_path;
+        }
+        else {
+            push @todo => [$new_x, $new_y, $new_path];
+        }
+    }
+}
+
+
+say "Solution 1: ", $solution1;
+say "Solution 2: ", $solution2;
+
+
+__END__
