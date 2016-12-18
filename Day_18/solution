@@ -1,0 +1,81 @@
+#!/opt/perl/bin/perl
+
+use 5.020;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+@ARGV = "input" unless @ARGV;
+
+my $solution1 =       0;
+my $solution2 =       0;
+
+my $TRAP      =       0;
+my $SAFE      =       1;
+my $MAX_ROWS1 =      40;
+my $MAX_ROWS2 = 400_000;
+
+my $input = <>;
+chomp $input;
+
+#
+# Create first row from the input. Add a leading safe and a trailing safe
+# place. In the problem space, they're non-existant, and hence safe. Adding
+# them makes the calculations below easier.
+#
+my @row = ($SAFE,
+            map ({$_ eq "^" ? $TRAP : $SAFE} split // => $input),
+           $SAFE);
+
+#
+# Count the safe places of the first row. Subtract 2 because the first
+# and last position don't exist in the problem space.
+#
+$solution1 += $_ for @row;
+$solution1 -= 2;
+$solution2  = $solution1;
+
+for my $row_count (1 .. $MAX_ROWS2 - 1) {
+    #
+    # Make a new row of the same length as the previous.
+    #
+    my @new_row = (undef) x @row;
+
+    #
+    # First and last postion are fixed to be safe.
+    #
+    $new_row [0] = $new_row [-1] = $SAFE;
+
+    #
+    # Fill in the rest
+    #
+    for (my $i = 1; $i < @row - 1; $i ++) {
+        #
+        # The four given rules condense to a simpler one: it's a trap
+        # of the left and right are different; else the place is safe.
+        #
+        $new_row [$i] //= ($row [$i - 1] xor $row [$i + 1]) ? $TRAP : $SAFE;
+    }
+
+    #
+    # Count the number of safe places in the new row.
+    #
+    if ($row_count < $MAX_ROWS1) {
+        $solution1 += $_ for @new_row;
+        $solution1 -= 2;
+    }
+    $solution2 += $_ for @new_row;
+    $solution2 -= 2;
+    @row = @new_row;
+}
+
+
+say "Solution 1: ", $solution1;
+say "Solution 2: ", $solution2;
+
+
+__END__
