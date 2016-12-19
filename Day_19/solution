@@ -1,0 +1,68 @@
+#!/opt/perl/bin/perl
+
+use 5.020;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+my $input    = @ARGV ? shift : 3017957;
+
+my $PREV_ELF = 0;
+my $NEXT_ELF = 1;
+
+sub solve ($part) {
+    #
+    # Put the elves in a linked list; we use a pointer to indicate
+    # which elf is going to be eliminated. In part 1, this will always
+    # be 2 elves from the previous target. In part 2, we skip an elf
+    # if there are an even number of elves left, else we pick the next elf.
+    # For part 1, the first target is the second elf; for part 2, the
+    # first elf will be the middle one (rounded down).
+    #
+
+    #
+    # @elves will be a circular double linked structure, embedded
+    # in an array. The "pointers" will just be array indices. 
+    # Each array index is one less than the elf's number.
+    #
+    my @elves;
+    @elves                  = map {[$_ - 2, $_]} 1 .. $input;
+    $elves  [0] [$PREV_ELF] = $input - 1;   # Tie the ends
+    $elves [-1] [$NEXT_ELF] = 0;            # together
+
+    my $nr_of_elves = $input;
+    my $target      = $part == 1 ? 1 : int ($input / 2);  # First target.
+
+    while ($nr_of_elves > 1) {
+        #
+        # Eliminate target
+        #
+        my $prev_target = $elves [$target] [$PREV_ELF];
+        my $next_target = $elves [$target] [$NEXT_ELF];
+        $elves [$prev_target] [$NEXT_ELF] = $next_target;
+        $elves [$next_target] [$PREV_ELF] = $prev_target;
+        $elves [$target] = [undef, undef];
+
+        $nr_of_elves --;
+
+        #
+        # Next target
+        #
+        $target = $next_target;
+        $target = $elves [$target] [$NEXT_ELF]
+                   unless $part == 2 && $nr_of_elves % 2;
+    }
+
+    $target + 1;
+}
+
+
+say "Solution 1: ", solve (1);
+say "Solution 2: ", solve (2);
+
+
+__END__
