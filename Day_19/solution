@@ -14,6 +14,9 @@ my $input    = @ARGV ? shift : 3017957;
 my $PREV_ELF = 0;
 my $NEXT_ELF = 1;
 
+my $PICK_LEFT     = 1;
+my $PICK_OPPOSITE = 2;
+
 sub solve ($part) {
     #
     # Put the elves in a linked list; we use a pointer to indicate
@@ -29,13 +32,17 @@ sub solve ($part) {
     # in an array. The "pointers" will just be array indices. 
     # Each array index is one less than the elf's number.
     #
-    my @elves;
+    my @elves;   # In the solution space, elf numbers are 0-based.
     @elves                  = map {[$_ - 2, $_]} 1 .. $input;
     $elves  [0] [$PREV_ELF] = $input - 1;   # Tie the ends
     $elves [-1] [$NEXT_ELF] = 0;            # together
 
+    # First target.
+    my $target      = $part == $PICK_LEFT     ? 1
+                    : $part == $PICK_OPPOSITE ? int ($input / 2)
+                    : die "Illegal value passed into solve ()";
+
     my $nr_of_elves = $input;
-    my $target      = $part == 1 ? 1 : int ($input / 2);  # First target.
 
     while ($nr_of_elves > 1) {
         #
@@ -54,15 +61,15 @@ sub solve ($part) {
         #
         $target = $next_target;
         $target = $elves [$target] [$NEXT_ELF]
-                   unless $part == 2 && $nr_of_elves % 2;
+                   unless $part == $PICK_OPPOSITE && $nr_of_elves % 2;
     }
 
-    $target + 1;
+    $target + 1;  # In the problem space, elf numbers are 1-based.
 }
 
 
-say "Solution 1: ", solve (1);
-say "Solution 2: ", solve (2);
+say "Solution 1: ", solve ($PICK_LEFT);
+say "Solution 2: ", solve ($PICK_OPPOSITE);
 
 
 __END__
