@@ -11,6 +11,17 @@ no  warnings 'experimental::signatures';
 
 my $input    = @ARGV ? shift : 3017957;
 
+#
+# Part 1 is an instance of the "Josephus problem". For k = 2 (as is the
+# case here), the surviving elf can be calculated by taking n (the number
+# of elves) in binary form, and moving the first 1 to the end. Aka, 
+# subtracting the highest power of 2 less than, or equal to n, doubling
+# the remainer, and adding 1 to it.
+#
+# There's a pattern for the second case as well. However, for neither 
+# solution we use this. Instead, we just play the game to the end.
+#
+
 my $PREV_ELF = 0;
 my $NEXT_ELF = 1;
 
