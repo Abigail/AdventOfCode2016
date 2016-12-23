@@ -1,0 +1,63 @@
+#!/opt/perl/bin/perl
+
+use 5.020;
+
+use strict;
+use warnings;
+no  warnings 'syntax';
+
+use feature  'signatures';
+no  warnings 'experimental::signatures';
+
+@ARGV = "input" unless @ARGV;
+
+my $solution1 = 0;
+my $solution2 = 0;
+
+my $disks;
+my %used;
+my %avail;
+
+my $SIZE  = 0;
+my $USED  = 1;
+my $AVAIL = 2;
+
+while (<>) {
+    next if $. <= 2;
+    m{^/dev/grid/node-x([0-9]+)-y([0-9]+)\s+
+       ([0-9]+)T\s+([0-9]+)T\s+([0-9]+)T\s+([0-9]+)%\s*$}x
+        or die $_;
+    my ($x, $y, $size, $used, $avail, $perc) = ($1, $2, $3, $4, $5);
+
+    $$disks [$x] [$y] = [$size, $used, $avail];
+
+    $used  {$used}  ++;
+    $avail {$avail} ++;
+}
+
+
+my $sum   = 0;
+foreach my $used (keys %used) {
+    next unless $used;
+    foreach my $avail (keys %avail) {
+        next if $avail < $used;
+        $solution1 += $avail  {$avail} * $used {$used};
+    }
+}
+#
+# We counted disks for which we can move the used data onto itself,
+# so now we have to subtract
+#
+for (my $x = 0; $x < @$disks; $x ++) {
+    for (my $y = 0; $y < @{$$disks [$x]}; $y ++) {
+        my $disk = $$disks [$x] [$y];
+        $solution1 -- if $$disk [$USED] && $$disk [$USED] <= $$disk [$AVAIL];
+    }
+}
+
+
+say "Solution 1: ", $solution1;
+say "Solution 2: ", $solution2;
+
+
+__END__
